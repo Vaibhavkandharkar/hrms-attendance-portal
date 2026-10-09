@@ -9,5 +9,6 @@ namespace HrmsApi.Data
 
         public DbSet<User> Users { get; set; }
         public DbSet<AttendanceRecord> AttendanceRecords { get; set; }
+        public DbSet<Employee> Employees { get; set; }
     }
 }

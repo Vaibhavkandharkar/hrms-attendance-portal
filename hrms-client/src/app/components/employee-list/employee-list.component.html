@@ -1,0 +1,142 @@
+<div class="employee-container">
+  <div class="header-section">
+    <div>
+      <h1 class="page-title">Employee Directory</h1>
+      <p class="page-subtitle">Manage your team members and their details</p>
+    </div>
+    <button class="btn-primary" (click)="openAddModal()">
+      <span class="icon">+</span> Add Employee
+    </button>
+  </div>
+
+  <div *ngIf="errorMessage" class="empty-state" style="color: red; border-color: red;">
+    <h3>Error Loading Data</h3>
+    <p>{{ errorMessage }}</p>
+  </div>
+
+  <ng-container *ngIf="employees$ | async as employees; else loading">
+    <div *ngIf="employees.length === 0 && !errorMessage" class="empty-state">
+      <div class="empty-icon">👥</div>
+      <h3>No employees found</h3>
+      <p>Get started by adding your first team member.</p>
+    </div>
+
+    <div *ngIf="employees.length > 0" class="table-container">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Contact</th>
+            <th>Department</th>
+            <th>Status</th>
+            <th>Joined</th>
+            <th class="actions-col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let emp of employees">
+            <td>
+              <div class="employee-name-cell">
+                <div class="avatar">{{ emp.firstName.charAt(0) }}{{ emp.lastName.charAt(0) }}</div>
+                <div class="name-details">
+                  <span class="full-name">{{ emp.firstName }} {{ emp.lastName }}</span>
+                  <span class="designation">{{ emp.designation }}</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="contact-info">
+                <span class="email">{{ emp.email }}</span>
+                <span class="phone" *ngIf="emp.phone">{{ emp.phone }}</span>
+              </div>
+            </td>
+            <td>
+              <span class="badge department-badge">{{ emp.department }}</span>
+            </td>
+            <td>
+              <span class="badge status-badge" [class.active]="emp.isActive" [class.inactive]="!emp.isActive">
+                {{ emp.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td class="date-cell">{{ emp.dateOfJoining | date:'mediumDate' }}</td>
+            <td class="actions-col">
+              <button class="btn-icon edit" title="Edit Employee" (click)="openEditModal(emp)">✏️</button>
+              <button class="btn-icon delete" title="Delete Employee" (click)="deleteEmployee(emp.id)">🗑️</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-container>
+
+  <ng-template #loading>
+    <div *ngIf="!errorMessage" class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading employees...</p>
+    </div>
+  </ng-template>
+
+  <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ isEditing ? 'Edit Employee' : 'Add Employee' }}</h2>
+        <button class="close-btn" (click)="closeModal()">&times;</button>
+      </div>
+      
+      <form [formGroup]="employeeForm" (ngSubmit)="saveEmployee()" class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">First Name *</label>
+            <input type="text" id="firstName" formControlName="firstName" class="form-control" [class.is-invalid]="employeeForm.get('firstName')?.invalid && employeeForm.get('firstName')?.touched">
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name *</label>
+            <input type="text" id="lastName" formControlName="lastName" class="form-control" [class.is-invalid]="employeeForm.get('lastName')?.invalid && employeeForm.get('lastName')?.touched">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="email">Email *</label>
+            <input type="email" id="email" formControlName="email" class="form-control" [class.is-invalid]="employeeForm.get('email')?.invalid && employeeForm.get('email')?.touched">
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone</label>
+            <input type="text" id="phone" formControlName="phone" class="form-control">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="department">Department *</label>
+            <input type="text" id="department" formControlName="department" class="form-control" [class.is-invalid]="employeeForm.get('department')?.invalid && employeeForm.get('department')?.touched">
+          </div>
+          <div class="form-group">
+            <label for="designation">Designation *</label>
+            <input type="text" id="designation" formControlName="designation" class="form-control" [class.is-invalid]="employeeForm.get('designation')?.invalid && employeeForm.get('designation')?.touched">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="dateOfJoining">Date of Joining *</label>
+            <input type="date" id="dateOfJoining" formControlName="dateOfJoining" class="form-control">
+          </div>
+          <div class="form-group checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="isActive">
+              Active Employee
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" (click)="closeModal()">Cancel</button>
+          <button type="submit" class="btn-primary" [disabled]="employeeForm.invalid">
+            {{ isEditing ? 'Save Changes' : 'Create Employee' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

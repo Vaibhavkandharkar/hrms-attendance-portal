@@ -1,0 +1,42 @@
+<div class="import-container">
+  <!-- File Upload Section -->
+  <input type="file" (change)="onFileSelected($event)" accept=".xlsx, .csv" />
+  <button (click)="onUpload()" [disabled]="!selectedFile || isLoading">
+    {{ isLoading ? 'Processing...' : 'Upload & Validate' }}
+  </button>
+
+  <!-- Success Notification -->
+  <div *ngIf="successMessage" class="alert-success">
+    {{ successMessage }}
+  </div>
+
+  <!-- Interactive Error Correction Table -->
+  <div *ngIf="failedRows.length > 0" class="error-correction-section">
+    <h3>⚠️ Validation Errors Found ({{ failedRows.length }} rows failed)</h3>
+    <p>Please correct the invalid GFCIDs below directly in the table and click retry.</p>
+
+    <table class="error-table">
+      <thead>
+        <tr>
+          <th>Row #</th>
+          <th>GFCID (Editable)</th>
+          <th>Error Reason</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of failedRows">
+          <td>{{ row.rowNumber }}</td>
+          <td>
+            <!-- Users can fix the typo/invalid GFCID right here -->
+            <input type="text" [(ngModel)]="row.gfcid" class="form-control" />
+          </td>
+          <td class="text-danger">{{ row.errorMessage }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <button class="btn-retry" (click)="retryCorrectedRows()" [disabled]="isLoading">
+      {{ isLoading ? 'Retrying...' : 'Resubmit Fixed Rows' }}
+    </button>
+  </div>
+</div>
